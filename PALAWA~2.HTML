@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Palawan Tourism System – Architecture & Schema</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Nunito:wght@300;400;600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--forest:#2d6a4f;--leaf:#52b788;--lime:#95d5b2;--mist:#d8f3dc;--ocean:#1b4965;--coral:#e07a5f;--gold:#f2cc8f;--dark:#1a1a2e;}
+    body{font-family:'Nunito',sans-serif;background:#f4f9f6;color:#333;}
+    h1,h2,h3{font-family:'Playfair Display',serif;}
+    .sidebar{background:var(--dark);min-height:100vh;position:fixed;width:240px;top:0;left:0;z-index:100;padding:24px 0;}
+    .main-content{margin-left:240px;padding:32px;}
+    .sidebar-logo{color:#fff;font-family:'Playfair Display',serif;font-size:1.1rem;padding:0 20px 24px;border-bottom:1px solid rgba(255,255,255,.1);}
+    .sidebar-logo span{color:var(--lime);}
+    .nav-section{padding:16px 20px 6px;color:rgba(255,255,255,.4);font-size:.7rem;text-transform:uppercase;letter-spacing:1.5px;font-weight:700;}
+    .sidebar-link{display:block;padding:9px 20px;color:rgba(255,255,255,.7);text-decoration:none;font-size:.88rem;font-weight:600;border-left:3px solid transparent;transition:.2s;}
+    .sidebar-link:hover,.sidebar-link.active{color:#fff;background:rgba(255,255,255,.07);border-left-color:var(--leaf);}
+    .page-header{background:linear-gradient(135deg,var(--forest),var(--ocean));color:#fff;border-radius:16px;padding:28px 32px;margin-bottom:28px;}
+    .card-schema{background:#fff;border-radius:14px;border:none;box-shadow:0 2px 16px rgba(0,0,0,.08);margin-bottom:24px;}
+    .card-schema .card-header{background:var(--forest);color:#fff;border-radius:14px 14px 0 0;padding:14px 20px;font-weight:700;font-size:.95rem;}
+    .card-schema .card-header.ocean{background:var(--ocean);}
+    .card-schema .card-header.coral{background:var(--coral);}
+    .card-schema .card-header.dark{background:var(--dark);}
+    .card-schema .card-header.gold{background:#8b6914;color:#fff;}
+    .table-schema th{background:#f0fdf4;color:var(--forest);font-size:.82rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap;}
+    .table-schema td{font-size:.88rem;vertical-align:middle;}
+    .badge-pk{background:#fef3c7;color:#92400e;font-size:.72rem;padding:3px 7px;border-radius:6px;font-weight:700;}
+    .badge-fk{background:#dbeafe;color:#1d4ed8;font-size:.72rem;padding:3px 7px;border-radius:6px;font-weight:700;}
+    .badge-nn{background:#fce7f3;color:#9d174d;font-size:.72rem;padding:3px 7px;border-radius:6px;font-weight:700;}
+    .badge-type{background:#f3f4f6;color:#374151;font-size:.72rem;padding:3px 7px;border-radius:6px;font-family:'Fira Code',monospace;}
+    /* Process Flow */
+    .flow-wrap{overflow-x:auto;}
+    .flow-step{min-width:140px;text-align:center;}
+    .flow-circle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.4rem;}
+    .flow-arrow{color:var(--leaf);font-size:1.5rem;align-self:center;padding:0 6px;}
+    .flow-label{font-size:.8rem;font-weight:700;color:var(--dark);}
+    .flow-sub{font-size:.72rem;color:#888;margin-top:3px;}
+    /* Architecture boxes */
+    .arch-layer{border-radius:12px;padding:18px;margin-bottom:16px;}
+    .arch-box{background:#fff;border-radius:10px;padding:12px 16px;border:2px solid var(--lime);font-size:.85rem;font-weight:600;color:var(--forest);text-align:center;}
+    .rel-line{font-size:.75rem;color:#888;font-style:italic;}
+    /* ERD */
+    .erd-table{background:#fff;border-radius:10px;border:2px solid var(--leaf);overflow:hidden;min-width:200px;}
+    .erd-thead{background:var(--forest);color:#fff;padding:10px 14px;font-weight:700;font-size:.88rem;}
+    .erd-row{padding:7px 14px;font-size:.82rem;border-top:1px solid #f0fdf4;}
+    .erd-pk{color:var(--gold);font-weight:700;}
+    .erd-fk{color:#60a5fa;}
+    @media(max-width:768px){.sidebar{display:none;}.main-content{margin-left:0;padding:16px;}}
+    code{background:#f0fdf4;color:var(--forest);padding:2px 6px;border-radius:5px;font-size:.82rem;}
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">🌿 Palawan <span>Tourism</span><br/><small style="color:rgba(255,255,255,.4);font-size:.7rem;font-family:'Nunito',sans-serif;">System Architecture</small></div>
+  <div class="nav-section">Overview</div>
+  <a class="sidebar-link active" href="#overview">System Overview</a>
+  <a class="sidebar-link" href="#roles">User Roles</a>
+  <a class="sidebar-link" href="#process-flow">Process Flow</a>
+  <div class="nav-section">Database</div>
+  <a class="sidebar-link" href="#schema">Full DB Schema</a>
+  <a class="sidebar-link" href="#relationships">Relationships ERD</a>
+  <div class="nav-section">Architecture</div>
+  <a class="sidebar-link" href="#laravel-structure">Laravel Structure</a>
+  <a class="sidebar-link" href="#modules">Feature Modules</a>
+</div>
+
+<!-- MAIN -->
+<div class="main-content">
+
+  <!-- PAGE HEADER -->
+  <div class="page-header" id="overview">
+    <div class="d-flex align-items-center gap-3 mb-2">
+      <div style="background:rgba(255,255,255,.15);border-radius:12px;padding:12px 16px;font-size:1.8rem;">🌿</div>
+      <div>
+        <h2 class="mb-0" style="font-size:1.8rem;">Palawan Tourism Portal</h2>
+        <div style="opacity:.8;font-size:.9rem;">System Architecture, Process Flow & Database Schema</div>
+      </div>
+    </div>
+    <div class="row g-3 mt-2">
+      <div class="col-6 col-sm-3"><div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:700;color:var(--gold);">3</div><div style="font-size:.78rem;opacity:.8;">User Roles</div></div></div>
+      <div class="col-6 col-sm-3"><div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:700;color:var(--gold);">18</div><div style="font-size:.78rem;opacity:.8;">DB Tables</div></div></div>
+      <div class="col-6 col-sm-3"><div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:700;color:var(--gold);">6</div><div style="font-size:.78rem;opacity:.8;">Main Modules</div></div></div>
+      <div class="col-6 col-sm-3"><div style="background:rgba(255,255,255,.12);border-radius:10px;padding:14px;text-align:center;"><div style="font-size:1.5rem;font-weight:700;color:var(--gold);">Laravel 11</div><div style="font-size:.78rem;opacity:.8;">Framework</div></div></div>
+    </div>
+  </div>
+
+  <!-- USER ROLES -->
+  <div id="roles">
+    <h4 class="mb-3" style="color:var(--dark);"><i class="fas fa-users me-2" style="color:var(--leaf);"></i>System User Roles</h4>
+    <div class="row g-4 mb-4">
+      <div class="col-md-4">
+        <div class="card-schema h-100">
+          <div class="card-header ocean"><i class="fas fa-university me-2"></i>Role 1: Government Admin</div>
+          <div class="p-4">
+            <div class="mb-3" style="font-size:.9rem;font-weight:700;color:var(--ocean);">Provincial Tourism Department</div>
+            <ul style="font-size:.87rem;color:#555;line-height:2;">
+              <li>Manage & approve establishment registrations</li>
+              <li>View all bookings system-wide</li>
+              <li>Generate tourism reports & analytics</li>
+              <li>Manage tourist spots & destinations</li>
+              <li>Set system-wide policies & fees</li>
+              <li>Manage user accounts (all roles)</li>
+              <li>Publish announcements & events</li>
+              <li>Monitor payments & revenue</li>
+            </ul>
+            <span class="badge" style="background:var(--ocean);color:#fff;border-radius:8px;padding:6px 12px;font-size:.8rem;">Super Admin</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-schema h-100">
+          <div class="card-header"><i class="fas fa-hotel me-2"></i>Role 2: Establishment Admin</div>
+          <div class="p-4">
+            <div class="mb-3" style="font-size:.9rem;font-weight:700;color:var(--forest);">Hotels, Resorts, Restaurants, Venues</div>
+            <ul style="font-size:.87rem;color:#555;line-height:2;">
+              <li>Register establishment (pending approval)</li>
+              <li>Manage rooms, services & pricing</li>
+              <li>View & confirm booking requests</li>
+              <li>Manage availability calendar</li>
+              <li>Communicate with tourists (inbox)</li>
+              <li>Process check-ins & check-outs</li>
+              <li>View revenue & booking reports</li>
+              <li>Respond to reviews</li>
+            </ul>
+            <span class="badge" style="background:var(--forest);color:#fff;border-radius:8px;padding:6px 12px;font-size:.8rem;">Establishment Manager</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card-schema h-100">
+          <div class="card-header coral"><i class="fas fa-user me-2"></i>Role 3: Tourist</div>
+          <div class="p-4">
+            <div class="mb-3" style="font-size:.9rem;font-weight:700;color:var(--coral);">Domestic & International Visitors</div>
+            <ul style="font-size:.87rem;color:#555;line-height:2;">
+              <li>Register & manage profile</li>
+              <li>Search & browse establishments</li>
+              <li>Book rooms, services, events</li>
+              <li>View/cancel bookings</li>
+              <li>Make online payments</li>
+              <li>Receive e-confirmations via email</li>
+              <li>Leave reviews & ratings</li>
+              <li>Save favorites / wishlist</li>
+            </ul>
+            <span class="badge" style="background:var(--coral);color:#fff;border-radius:8px;padding:6px 12px;font-size:.8rem;">Tourist / Guest</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROCESS FLOW -->
+  <div id="process-flow" class="card-schema">
+    <div class="card-header dark"><i class="fas fa-project-diagram me-2"></i>System Process Flow</div>
+    <div class="p-4">
+
+      <!-- Tourist Flow -->
+      <h6 style="color:var(--coral);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;font-size:.82rem;">🌴 Tourist Booking Flow</h6>
+      <div class="flow-wrap d-flex align-items-start gap-1 mb-4 pb-4" style="border-bottom:2px dashed #e8f5e9;">
+        <div class="flow-step"><div class="flow-circle" style="background:#fef3c7;"><i class="fas fa-user-plus" style="color:#d97706;"></i></div><div class="flow-label">Register</div><div class="flow-sub">Create account</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:var(--mist);"><i class="fas fa-search" style="color:var(--forest);"></i></div><div class="flow-label">Browse</div><div class="flow-sub">Search / filter</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#dbeafe;"><i class="fas fa-calendar" style="color:#1d4ed8;"></i></div><div class="flow-label">Select Dates</div><div class="flow-sub">Check availability</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fce7f3;"><i class="fas fa-concierge-bell" style="color:#9d174d;"></i></div><div class="flow-label">Choose Services</div><div class="flow-sub">Rooms / add-ons</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fef9c3;"><i class="fas fa-credit-card" style="color:#854d0e;"></i></div><div class="flow-label">Pay Online</div><div class="flow-sub">GCash / Card</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:var(--mist);"><i class="fas fa-envelope-open-text" style="color:var(--forest);"></i></div><div class="flow-label">Confirmation</div><div class="flow-sub">Email + QR code</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fef3c7;"><i class="fas fa-umbrella-beach" style="color:#d97706;"></i></div><div class="flow-label">Check-in</div><div class="flow-sub">Present QR code</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#dbeafe;"><i class="fas fa-star" style="color:#1d4ed8;"></i></div><div class="flow-label">Review</div><div class="flow-sub">Rate & comment</div></div>
+      </div>
+
+      <!-- Establishment Flow -->
+      <h6 style="color:var(--forest);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;font-size:.82rem;">🏨 Establishment Flow</h6>
+      <div class="flow-wrap d-flex align-items-start gap-1 mb-4 pb-4" style="border-bottom:2px dashed #e8f5e9;">
+        <div class="flow-step"><div class="flow-circle" style="background:var(--mist);"><i class="fas fa-file-alt" style="color:var(--forest);"></i></div><div class="flow-label">Apply / Register</div><div class="flow-sub">Submit documents</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fef3c7;"><i class="fas fa-hourglass-half" style="color:#d97706;"></i></div><div class="flow-label">Pending Review</div><div class="flow-sub">Admin verifies</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#d1fae5;"><i class="fas fa-check-circle" style="color:#065f46;"></i></div><div class="flow-label">Approved</div><div class="flow-sub">Listed on portal</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#dbeafe;"><i class="fas fa-plus-circle" style="color:#1d4ed8;"></i></div><div class="flow-label">Setup Profile</div><div class="flow-sub">Add rooms/services</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:var(--mist);"><i class="fas fa-bell" style="color:var(--forest);"></i></div><div class="flow-label">Receive Bookings</div><div class="flow-sub">Notification sent</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fce7f3;"><i class="fas fa-handshake" style="color:#9d174d;"></i></div><div class="flow-label">Confirm/Decline</div><div class="flow-sub">Manage requests</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fef9c3;"><i class="fas fa-chart-bar" style="color:#854d0e;"></i></div><div class="flow-label">Reports</div><div class="flow-sub">Revenue & stats</div></div>
+      </div>
+
+      <!-- Admin Flow -->
+      <h6 style="color:var(--ocean);font-weight:700;margin-bottom:16px;text-transform:uppercase;letter-spacing:1px;font-size:.82rem;">🏛️ Government Admin Flow</h6>
+      <div class="flow-wrap d-flex align-items-start gap-1">
+        <div class="flow-step"><div class="flow-circle" style="background:#dbeafe;"><i class="fas fa-tasks" style="color:#1d4ed8;"></i></div><div class="flow-label">Review Apps</div><div class="flow-sub">Approve/Reject</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:var(--mist);"><i class="fas fa-map-marked" style="color:var(--forest);"></i></div><div class="flow-label">Manage Spots</div><div class="flow-sub">Add destinations</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fef3c7;"><i class="fas fa-eye" style="color:#d97706;"></i></div><div class="flow-label">Monitor Bookings</div><div class="flow-sub">System-wide view</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#fce7f3;"><i class="fas fa-money-bill" style="color:#9d174d;"></i></div><div class="flow-label">Track Revenue</div><div class="flow-sub">Tourism fees</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step"><div class="flow-circle" style="background:#d1fae5;"><i class="fas fa-file-export" style="color:#065f46;"></i></div><div class="flow-label">Generate Reports</div><div class="flow-sub">Export to Excel/PDF</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATABASE SCHEMA -->
+  <div id="schema" class="mt-4">
+    <h4 class="mb-3" style="color:var(--dark);"><i class="fas fa-database me-2" style="color:var(--leaf);"></i>Complete Database Schema (18 Tables)</h4>
+
+    <!-- users -->
+    <div class="card-schema">
+      <div class="card-header ocean"><i class="fas fa-users me-2"></i>Table: <code style="background:rgba(255,255,255,.2);color:#fff;">users</code></div>
+      <div class="table-responsive">
+        <table class="table table-schema table-hover mb-0">
+          <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-pk">PK</span> <span class="badge-nn">NOT NULL</span></td><td>Auto-increment primary key</td></tr>
+            <tr><td>first_name</td><td><span class="badge-type">VARCHAR(100)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Tourist or user first name</td></tr>
+            <tr><td>last_name</td><td><span class="badge-type">VARCHAR(100)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Tourist or user last name</td></tr>
+            <tr><td>email</td><td><span class="badge-type">VARCHAR(200)</span></td><td>UNIQUE <span class="badge-nn">NOT NULL</span></td><td>Login email</td></tr>
+            <tr><td>email_verified_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td>Email verification timestamp</td></tr>
+            <tr><td>password</td><td><span class="badge-type">VARCHAR(255)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Bcrypt hashed password</td></tr>
+            <tr><td>phone</td><td><span class="badge-type">VARCHAR(20)</span></td><td>NULLABLE</td><td>Contact number</td></tr>
+            <tr><td>nationality</td><td><span class="badge-type">VARCHAR(60)</span></td><td>NULLABLE</td><td>Country of origin</td></tr>
+            <tr><td>address</td><td><span class="badge-type">TEXT</span></td><td>NULLABLE</td><td>Home address</td></tr>
+            <tr><td>profile_photo</td><td><span class="badge-type">VARCHAR(255)</span></td><td>NULLABLE</td><td>Avatar/profile image path</td></tr>
+            <tr><td>role</td><td><span class="badge-type">ENUM</span></td><td><span class="badge-nn">NOT NULL</span></td><td>'tourist', 'establishment', 'admin'</td></tr>
+            <tr><td>is_active</td><td><span class="badge-type">TINYINT(1)</span></td><td>DEFAULT 1</td><td>Account active flag</td></tr>
+            <tr><td>remember_token</td><td><span class="badge-type">VARCHAR(100)</span></td><td>NULLABLE</td><td>Laravel remember me token</td></tr>
+            <tr><td>created_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td>Registration date</td></tr>
+            <tr><td>updated_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td>Last update</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- establishments -->
+    <div class="card-schema">
+      <div class="card-header"><i class="fas fa-hotel me-2"></i>Table: <code style="background:rgba(255,255,255,.2);color:#fff;">establishments</code></div>
+      <div class="table-responsive">
+        <table class="table table-schema table-hover mb-0">
+          <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-pk">PK</span></td><td>Auto-increment</td></tr>
+            <tr><td><span class="erd-fk">user_id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-fk">FK → users.id</span></td><td>Owner/manager account</td></tr>
+            <tr><td>name</td><td><span class="badge-type">VARCHAR(200)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Establishment name</td></tr>
+            <tr><td>slug</td><td><span class="badge-type">VARCHAR(220)</span></td><td>UNIQUE</td><td>URL-friendly identifier</td></tr>
+            <tr><td>type</td><td><span class="badge-type">ENUM</span></td><td><span class="badge-nn">NOT NULL</span></td><td>'hotel','resort','restaurant','tourist_spot','event_venue'</td></tr>
+            <tr><td>description</td><td><span class="badge-type">TEXT</span></td><td>NULLABLE</td><td>Full description</td></tr>
+            <tr><td>short_desc</td><td><span class="badge-type">VARCHAR(500)</span></td><td>NULLABLE</td><td>Brief summary for listing card</td></tr>
+            <tr><td>address</td><td><span class="badge-type">TEXT</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Physical address</td></tr>
+            <tr><td>municipality</td><td><span class="badge-type">VARCHAR(100)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>e.g. El Nido, Coron, Puerto Princesa</td></tr>
+            <tr><td>latitude</td><td><span class="badge-type">DECIMAL(10,8)</span></td><td>NULLABLE</td><td>GPS latitude</td></tr>
+            <tr><td>longitude</td><td><span class="badge-type">DECIMAL(11,8)</span></td><td>NULLABLE</td><td>GPS longitude</td></tr>
+            <tr><td>phone</td><td><span class="badge-type">VARCHAR(20)</span></td><td>NULLABLE</td><td>Contact number</td></tr>
+            <tr><td>email</td><td><span class="badge-type">VARCHAR(200)</span></td><td>NULLABLE</td><td>Business email</td></tr>
+            <tr><td>website</td><td><span class="badge-type">VARCHAR(255)</span></td><td>NULLABLE</td><td>Business website URL</td></tr>
+            <tr><td>cover_photo</td><td><span class="badge-type">VARCHAR(255)</span></td><td>NULLABLE</td><td>Hero/banner image</td></tr>
+            <tr><td>logo</td><td><span class="badge-type">VARCHAR(255)</span></td><td>NULLABLE</td><td>Establishment logo</td></tr>
+            <tr><td>accreditation_no</td><td><span class="badge-type">VARCHAR(60)</span></td><td>NULLABLE</td><td>DOT accreditation number</td></tr>
+            <tr><td>status</td><td><span class="badge-type">ENUM</span></td><td>DEFAULT 'pending'</td><td>'pending','approved','suspended','rejected'</td></tr>
+            <tr><td>approved_by</td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td>NULLABLE FK → users.id</td><td>Admin who approved</td></tr>
+            <tr><td>approved_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td>Approval timestamp</td></tr>
+            <tr><td>avg_rating</td><td><span class="badge-type">DECIMAL(3,2)</span></td><td>DEFAULT 0</td><td>Cached average rating</td></tr>
+            <tr><td>total_reviews</td><td><span class="badge-type">INT</span></td><td>DEFAULT 0</td><td>Cached review count</td></tr>
+            <tr><td>created_at / updated_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td>Timestamps</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- rooms -->
+    <div class="card-schema">
+      <div class="card-header"><i class="fas fa-bed me-2"></i>Table: <code style="background:rgba(255,255,255,.2);color:#fff;">rooms</code></div>
+      <div class="table-responsive">
+        <table class="table table-schema table-hover mb-0">
+          <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-pk">PK</span></td><td></td></tr>
+            <tr><td><span class="erd-fk">establishment_id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-fk">FK → establishments.id</span></td><td>Owning establishment</td></tr>
+            <tr><td>name</td><td><span class="badge-type">VARCHAR(150)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>e.g. "Deluxe Ocean View"</td></tr>
+            <tr><td>room_number</td><td><span class="badge-type">VARCHAR(20)</span></td><td>NULLABLE</td><td>Physical room identifier</td></tr>
+            <tr><td>type</td><td><span class="badge-type">ENUM</span></td><td></td><td>'standard','deluxe','suite','villa','dormitory'</td></tr>
+            <tr><td>description</td><td><span class="badge-type">TEXT</span></td><td>NULLABLE</td><td>Room details and amenities</td></tr>
+            <tr><td>capacity</td><td><span class="badge-type">TINYINT</span></td><td>DEFAULT 2</td><td>Max number of guests</td></tr>
+            <tr><td>price_per_night</td><td><span class="badge-type">DECIMAL(10,2)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Base nightly rate in PHP</td></tr>
+            <tr><td>is_available</td><td><span class="badge-type">TINYINT(1)</span></td><td>DEFAULT 1</td><td>Overall availability flag</td></tr>
+            <tr><td>amenities</td><td><span class="badge-type">JSON</span></td><td>NULLABLE</td><td>['wifi','aircon','pool','balcony',...]</td></tr>
+            <tr><td>photos</td><td><span class="badge-type">JSON</span></td><td>NULLABLE</td><td>Array of image paths</td></tr>
+            <tr><td>created_at / updated_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- services -->
+    <div class="card-schema">
+      <div class="card-header coral"><i class="fas fa-concierge-bell me-2"></i>Table: <code style="background:rgba(255,255,255,.2);color:#fff;">services</code> (Tours, Add-ons, Dining Packages)</div>
+      <div class="table-responsive">
+        <table class="table table-schema table-hover mb-0">
+          <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-pk">PK</span></td><td></td></tr>
+            <tr><td><span class="erd-fk">establishment_id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-fk">FK → establishments.id</span></td><td></td></tr>
+            <tr><td>name</td><td><span class="badge-type">VARCHAR(200)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>e.g. "Island Hopping Tour A"</td></tr>
+            <tr><td>category</td><td><span class="badge-type">ENUM</span></td><td></td><td>'tour','dining','transport','activity','event','other'</td></tr>
+            <tr><td>description</td><td><span class="badge-type">TEXT</span></td><td>NULLABLE</td><td>Full service details</td></tr>
+            <tr><td>price</td><td><span class="badge-type">DECIMAL(10,2)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Base price</td></tr>
+            <tr><td>price_type</td><td><span class="badge-type">ENUM</span></td><td></td><td>'per_person','per_group','flat_rate','per_night'</td></tr>
+            <tr><td>max_capacity</td><td><span class="badge-type">INT</span></td><td>NULLABLE</td><td>Max participants per slot</td></tr>
+            <tr><td>duration_hours</td><td><span class="badge-type">DECIMAL(4,1)</span></td><td>NULLABLE</td><td>Duration in hours</td></tr>
+            <tr><td>photos</td><td><span class="badge-type">JSON</span></td><td>NULLABLE</td><td>Service images</td></tr>
+            <tr><td>is_active</td><td><span class="badge-type">TINYINT(1)</span></td><td>DEFAULT 1</td><td></td></tr>
+            <tr><td>created_at / updated_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- bookings -->
+    <div class="card-schema">
+      <div class="card-header dark"><i class="fas fa-calendar-check me-2"></i>Table: <code style="background:rgba(255,255,255,.2);color:#fff;">bookings</code> (Core Transaction Table)</div>
+      <div class="table-responsive">
+        <table class="table table-schema table-hover mb-0">
+          <thead><tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr></thead>
+          <tbody>
+            <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-pk">PK</span></td><td></td></tr>
+            <tr><td>booking_ref</td><td><span class="badge-type">VARCHAR(20)</span></td><td>UNIQUE <span class="badge-nn">NOT NULL</span></td><td>e.g. PLW-2025-00001</td></tr>
+            <tr><td><span class="erd-fk">tourist_id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-fk">FK → users.id</span></td><td>Tourist who booked</td></tr>
+            <tr><td><span class="erd-fk">establishment_id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td><span class="badge-fk">FK → establishments.id</span></td><td></td></tr>
+            <tr><td><span class="erd-fk">room_id</span></td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td>NULLABLE <span class="badge-fk">FK → rooms.id</span></td><td>Null if service-only booking</td></tr>
+            <tr><td>booking_type</td><td><span class="badge-type">ENUM</span></td><td><span class="badge-nn">NOT NULL</span></td><td>'room','service','event','tour','table_reservation'</td></tr>
+            <tr><td>check_in_date</td><td><span class="badge-type">DATE</span></td><td>NULLABLE</td><td>Check-in date</td></tr>
+            <tr><td>check_out_date</td><td><span class="badge-type">DATE</span></td><td>NULLABLE</td><td>Check-out date</td></tr>
+            <tr><td>event_date</td><td><span class="badge-type">DATETIME</span></td><td>NULLABLE</td><td>For tours/events: scheduled datetime</td></tr>
+            <tr><td>num_guests</td><td><span class="badge-type">TINYINT</span></td><td>DEFAULT 1</td><td>Number of guests</td></tr>
+            <tr><td>special_requests</td><td><span class="badge-type">TEXT</span></td><td>NULLABLE</td><td>Dietary needs, accessibility, etc.</td></tr>
+            <tr><td>subtotal</td><td><span class="badge-type">DECIMAL(12,2)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Before fees</td></tr>
+            <tr><td>tourism_fee</td><td><span class="badge-type">DECIMAL(10,2)</span></td><td>DEFAULT 0</td><td>Government tourism fee</td></tr>
+            <tr><td>discount</td><td><span class="badge-type">DECIMAL(10,2)</span></td><td>DEFAULT 0</td><td>Promo/coupon discount</td></tr>
+            <tr><td>total_amount</td><td><span class="badge-type">DECIMAL(12,2)</span></td><td><span class="badge-nn">NOT NULL</span></td><td>Final amount to pay</td></tr>
+            <tr><td>status</td><td><span class="badge-type">ENUM</span></td><td>DEFAULT 'pending'</td><td>'pending','confirmed','checked_in','checked_out','cancelled','no_show'</td></tr>
+            <tr><td>confirmed_by</td><td><span class="badge-type">BIGINT UNSIGNED</span></td><td>NULLABLE FK → users.id</td><td>Establishment staff who confirmed</td></tr>
+            <tr><td>confirmed_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td></td></tr>
+            <tr><td>cancellation_reason</td><td><span class="badge-type">TEXT</span></td><td>NULLABLE</td><td></td></tr>
+            <tr><td>qr_code</td><td><span class="badge-type">VARCHAR(255)</span></td><td>NULLABLE</td><td>QR code image path</td></tr>
+            <tr><td>created_at / updated_at</td><td><span class="badge-type">TIMESTAMP</span></td><td>NULLABLE</td><td></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- booking_services -->
+    <div class="card-schema">
+      <div class="card-header coral"><i class="fas fa-link me-2"></i>Tables: <code style="background:rgba(255,255,255,.2);color:#fff;">booking_services</code> | <code style="background:rgba(255,255,255,.2);color:#fff;">payments</code> | <code style="background:rgba(255,255,255,.2);color:#fff;">reviews</code> | <code style="background:rgba(255,255,255,.2);color:#fff;">tourist_spots</code></div>
+      <div class="p-4">
+        <div class="row g-4">
+          <!-- booking_services -->
+          <div class="col-md-6">
+            <h6 style="color:var(--forest);font-weight:700;">booking_services <small class="text-muted">(pivot)</small></h6>
+            <table class="table table-schema table-sm mb-0">
+              <thead><tr><th>Column</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT PK</span></td></tr>
+                <tr><td><span class="erd-fk">booking_id</span></td><td><span class="badge-fk">FK → bookings.id</span></td></tr>
+                <tr><td><span class="erd-fk">service_id</span></td><td><span class="badge-fk">FK → services.id</span></td></tr>
+                <tr><td>quantity</td><td><span class="badge-type">INT DEFAULT 1</span></td></tr>
+                <tr><td>unit_price</td><td><span class="badge-type">DECIMAL(10,2)</span></td></tr>
+                <tr><td>subtotal</td><td><span class="badge-type">DECIMAL(12,2)</span></td></tr>
+                <tr><td>scheduled_at</td><td><span class="badge-type">DATETIME NULLABLE</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- payments -->
+          <div class="col-md-6">
+            <h6 style="color:var(--forest);font-weight:700;">payments</h6>
+            <table class="table table-schema table-sm mb-0">
+              <thead><tr><th>Column</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT PK</span></td></tr>
+                <tr><td><span class="erd-fk">booking_id</span></td><td><span class="badge-fk">FK → bookings.id</span></td></tr>
+                <tr><td>payment_ref</td><td><span class="badge-type">VARCHAR(80) UNIQUE</span></td></tr>
+                <tr><td>method</td><td><span class="badge-type">ENUM gcash/card/bank/cash</span></td></tr>
+                <tr><td>amount</td><td><span class="badge-type">DECIMAL(12,2)</span></td></tr>
+                <tr><td>status</td><td><span class="badge-type">ENUM pending/paid/failed/refunded</span></td></tr>
+                <tr><td>paid_at</td><td><span class="badge-type">TIMESTAMP NULLABLE</span></td></tr>
+                <tr><td>gateway_response</td><td><span class="badge-type">JSON NULLABLE</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- reviews -->
+          <div class="col-md-6">
+            <h6 style="color:var(--forest);font-weight:700;">reviews</h6>
+            <table class="table table-schema table-sm mb-0">
+              <thead><tr><th>Column</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT PK</span></td></tr>
+                <tr><td><span class="erd-fk">tourist_id</span></td><td><span class="badge-fk">FK → users.id</span></td></tr>
+                <tr><td><span class="erd-fk">establishment_id</span></td><td><span class="badge-fk">FK → establishments.id</span></td></tr>
+                <tr><td><span class="erd-fk">booking_id</span></td><td><span class="badge-fk">FK → bookings.id</span></td></tr>
+                <tr><td>rating</td><td><span class="badge-type">TINYINT 1–5</span></td></tr>
+                <tr><td>title</td><td><span class="badge-type">VARCHAR(200)</span></td></tr>
+                <tr><td>body</td><td><span class="badge-type">TEXT</span></td></tr>
+                <tr><td>reply</td><td><span class="badge-type">TEXT NULLABLE</span></td></tr>
+                <tr><td>is_approved</td><td><span class="badge-type">TINYINT DEFAULT 1</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <!-- tourist_spots -->
+          <div class="col-md-6">
+            <h6 style="color:var(--forest);font-weight:700;">tourist_spots</h6>
+            <table class="table table-schema table-sm mb-0">
+              <thead><tr><th>Column</th><th>Type</th></tr></thead>
+              <tbody>
+                <tr><td><span class="erd-pk">id</span></td><td><span class="badge-type">BIGINT PK</span></td></tr>
+                <tr><td>name</td><td><span class="badge-type">VARCHAR(200) NOT NULL</span></td></tr>
+                <tr><td>slug</td><td><span class="badge-type">VARCHAR(220) UNIQUE</span></td></tr>
+                <tr><td>category</td><td><span class="badge-type">ENUM island/beach/cave/reef/river/park</span></td></tr>
+                <tr><td>municipality</td><td><span class="badge-type">VARCHAR(100)</span></td></tr>
+                <tr><td>description</td><td><span class="badge-type">TEXT</span></td></tr>
+                <tr><td>cover_photo</td><td><span class="badge-type">VARCHAR(255)</span></td></tr>
+                <tr><td>entrance_fee</td><td><span class="badge-type">DECIMAL(8,2) NULLABLE</span></td></tr>
+                <tr><td>latitude / longitude</td><td><span class="badge-type">DECIMAL</span></td></tr>
+                <tr><td>is_featured</td><td><span class="badge-type">TINYINT DEFAULT 0</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Additional tables summary -->
+    <div class="card-schema">
+      <div class="card-header gold"><i class="fas fa-table me-2"></i>Additional Tables Summary</div>
+      <div class="table-responsive">
+        <table class="table table-schema table-hover mb-0">
+          <thead><tr><th>Table Name</th><th>Purpose</th><th>Key Columns</th></tr></thead>
+          <tbody>
+            <tr><td><code>establishment_photos</code></td><td>Gallery images for each establishment</td><td>id, establishment_id (FK), photo_path, caption, sort_order</td></tr>
+            <tr><td><code>room_availability</code></td><td>Blocked dates per room (manual & booked)</td><td>id, room_id (FK), blocked_date, reason, booking_id (FK)</td></tr>
+            <tr><td><code>availability_schedules</code></td><td>Service/tour available time slots</td><td>id, service_id (FK), date, start_time, slots_available, slots_booked</td></tr>
+            <tr><td><code>messages</code></td><td>In-portal messaging between tourists & establishments</td><td>id, sender_id (FK), receiver_id (FK), booking_id (FK), body, is_read</td></tr>
+            <tr><td><code>notifications</code></td><td>System notifications for all users</td><td>id, user_id (FK), type, title, body, data (JSON), read_at</td></tr>
+            <tr><td><code>announcements</code></td><td>Tourism dept public announcements/events</td><td>id, admin_id (FK), title, body, photo, published_at, expires_at</td></tr>
+            <tr><td><code>wishlists</code></td><td>Tourist saved/favorite establishments</td><td>id, tourist_id (FK), establishment_id (FK)</td></tr>
+            <tr><td><code>tourism_fees_log</code></td><td>Audit log of tourism fees collected per booking</td><td>id, booking_id (FK), amount, remitted_at, remitted_by</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- LARAVEL STRUCTURE -->
+  <div id="laravel-structure" class="mt-4">
+    <h4 class="mb-3" style="color:var(--dark);"><i class="fab fa-laravel me-2" style="color:#e07a5f;"></i>Laravel 11 Project Structure</h4>
+    <div class="card-schema">
+      <div class="card-header dark"><i class="fas fa-folder-tree me-2"></i>Directory Structure</div>
+      <div class="p-4">
+        <pre style="background:#0d1117;color:#c9d1d9;border-radius:12px;padding:24px;font-family:'Fira Code',monospace;font-size:.82rem;overflow-x:auto;line-height:1.8;">palawan-tourism/
+├── app/
+│   ├── Http/
+│   │   ├── Controllers/
+│   │   │   ├── Auth/
+│   │   │   │   └── AuthController.php        <span style="color:#8b949e;">// Login, Register, Logout (3 roles)</span>
+│   │   │   ├── Admin/
+│   │   │   │   ├── DashboardController.php   <span style="color:#8b949e;">// Gov't analytics & overview</span>
+│   │   │   │   ├── EstablishmentController.php <span style="color:#8b949e;">// Approve/reject/suspend</span>
+│   │   │   │   ├── TouristSpotController.php <span style="color:#8b949e;">// CRUD spots</span>
+│   │   │   │   ├── BookingController.php     <span style="color:#8b949e;">// System-wide booking view</span>
+│   │   │   │   ├── UserController.php        <span style="color:#8b949e;">// Manage all users</span>
+│   │   │   │   ├── AnnouncementController.php
+│   │   │   │   └── ReportController.php      <span style="color:#8b949e;">// PDF/Excel export</span>
+│   │   │   ├── Establishment/
+│   │   │   │   ├── DashboardController.php
+│   │   │   │   ├── RoomController.php        <span style="color:#8b949e;">// CRUD rooms</span>
+│   │   │   │   ├── ServiceController.php     <span style="color:#8b949e;">// CRUD services/tours</span>
+│   │   │   │   ├── BookingController.php     <span style="color:#8b949e;">// View & confirm bookings</span>
+│   │   │   │   ├── AvailabilityController.php <span style="color:#8b949e;">// Calendar management</span>
+│   │   │   │   ├── MessageController.php
+│   │   │   │   └── ReviewController.php      <span style="color:#8b949e;">// Reply to reviews</span>
+│   │   │   └── Tourist/
+│   │   │       ├── HomeController.php        <span style="color:#8b949e;">// Landing + search</span>
+│   │   │       ├── EstablishmentController.php <span style="color:#8b949e;">// Browse/view profile</span>
+│   │   │       ├── BookingController.php     <span style="color:#8b949e;">// Create, view, cancel</span>
+│   │   │       ├── PaymentController.php     <span style="color:#8b949e;">// Payment gateway</span>
+│   │   │       ├── ProfileController.php
+│   │   │       ├── WishlistController.php
+│   │   │       └── ReviewController.php
+│   │   ├── Middleware/
+│   │   │   ├── IsAdmin.php
+│   │   │   ├── IsEstablishment.php
+│   │   │   ├── IsTourist.php
+│   │   │   └── EstablishmentApproved.php
+│   │   └── Requests/
+│   │       ├── BookingRequest.php
+│   │       ├── EstablishmentRequest.php
+│   │       └── RoomRequest.php
+│   ├── Models/
+│   │   ├── User.php
+│   │   ├── Establishment.php
+│   │   ├── Room.php
+│   │   ├── Service.php
+│   │   ├── Booking.php
+│   │   ├── BookingService.php
+│   │   ├── Payment.php
+│   │   ├── Review.php
+│   │   ├── TouristSpot.php
+│   │   ├── Message.php
+│   │   ├── Notification.php
+│   │   ├── Announcement.php
+│   │   ├── Wishlist.php
+│   │   └── TourismFeeLog.php
+│   ├── Services/
+│   │   ├── BookingService.php               <span style="color:#8b949e;">// Business logic</span>
+│   │   ├── PaymentService.php               <span style="color:#8b949e;">// GCash / PayMongo integration</span>
+│   │   ├── NotificationService.php
+│   │   └── QrCodeService.php                <span style="color:#8b949e;">// Generate booking QR</span>
+│   └── Notifications/
+│       ├── BookingConfirmed.php
+│       ├── BookingCancelled.php
+│       └── EstablishmentApproved.php
+├── database/
+│   ├── migrations/                          <span style="color:#8b949e;">// 18 migration files</span>
+│   └── seeders/
+│       ├── DatabaseSeeder.php
+│       ├── UserSeeder.php                   <span style="color:#8b949e;">// Admin + sample accounts</span>
+│       ├── EstablishmentSeeder.php          <span style="color:#8b949e;">// 10 dummy establishments</span>
+│       └── TouristSpotSeeder.php            <span style="color:#8b949e;">// 8 Palawan spots</span>
+├── resources/
+│   └── views/
+│       ├── layouts/
+│       │   ├── app.blade.php                <span style="color:#8b949e;">// Public layout (nature theme)</span>
+│       │   ├── admin.blade.php
+│       │   ├── establishment.blade.php
+│       │   └── tourist.blade.php
+│       ├── auth/
+│       │   ├── login.blade.php
+│       │   └── register.blade.php
+│       ├── admin/                           <span style="color:#8b949e;">// Gov't admin views</span>
+│       ├── establishment/                   <span style="color:#8b949e;">// Establishment portal views</span>
+│       └── tourist/                         <span style="color:#8b949e;">// Tourist-facing views</span>
+└── routes/
+    └── web.php                              <span style="color:#8b949e;">// Grouped routes by role</span></pre>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODULES -->
+  <div id="modules" class="mt-4 mb-5">
+    <h4 class="mb-3" style="color:var(--dark);"><i class="fas fa-cubes me-2" style="color:var(--leaf);"></i>Feature Modules</h4>
+    <div class="row g-3">
+      <div class="col-sm-6 col-lg-4"><div class="card-schema h-100"><div class="card-header"><i class="fas fa-user-circle me-2"></i>Auth Module</div><div class="p-3 small">Multi-role login & registration, email verification, password reset, remember token, middleware guards per role, session management.</div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card-schema h-100"><div class="card-header ocean"><i class="fas fa-calendar-alt me-2"></i>Booking Engine</div><div class="p-3 small">Real-time availability check, conflict detection, booking reference generation (PLW-YYYY-NNNNN), multi-step form, service add-ons, status workflow.</div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card-schema h-100"><div class="card-header coral"><i class="fas fa-credit-card me-2"></i>Payment Gateway</div><div class="p-3 small">PayMongo / GCash integration, payment status webhook, receipt generation, refund workflow, tourism fee auto-calculation & remittance.</div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card-schema h-100"><div class="card-header dark"><i class="fas fa-qrcode me-2"></i>QR Check-in</div><div class="p-3 small">Auto-generate QR code per booking, email QR to tourist, establishment scans QR to check in, status auto-updates to 'checked_in'.</div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card-schema h-100"><div class="card-header gold"><i class="fas fa-star me-2"></i>Review System</div><div class="p-3 small">Post-stay review gating (only completed bookings), 1–5 star rating, establishment reply, admin moderation, avg_rating cache update.</div></div></div>
+      <div class="col-sm-6 col-lg-4"><div class="card-schema h-100"><div class="card-header"><i class="fas fa-chart-pie me-2"></i>Reports & Analytics</div><div class="p-3 small">Tourism arrivals dashboard, revenue by municipality, top establishments, booking trends (month/year), Excel & PDF export via Laravel Excel + DomPDF.</div></div></div>
+    </div>
+  </div>
+
+</div><!-- /main-content -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Highlight active sidebar link on scroll
+  const sections = document.querySelectorAll('[id]');
+  const links = document.querySelectorAll('.sidebar-link');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+    links.forEach(l => { l.classList.toggle('active', l.getAttribute('href') === '#'+current); });
+  });
+</script>
+</body>
+</html>

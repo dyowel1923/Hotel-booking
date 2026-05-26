@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Palawan Tourism Portal – Discover Paradise</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --forest:   #2d6a4f;
+      --leaf:     #52b788;
+      --lime:     #95d5b2;
+      --mist:     #d8f3dc;
+      --sand:     #f9ede3;
+      --ocean:    #1b4965;
+      --coral:    #e07a5f;
+      --gold:     #f2cc8f;
+      --white:    #ffffff;
+      --dark:     #1a1a2e;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Nunito', sans-serif; color: #333; background: #f9f9f6; overflow-x: hidden; }
+    h1,h2,h3,h4,h5 { font-family: 'Playfair Display', serif; }
+
+    /* ── NAVBAR ── */
+    .navbar-custom {
+      background: rgba(45,106,79,0.95);
+      backdrop-filter: blur(8px);
+      padding: 14px 0;
+      position: fixed; top:0; width:100%; z-index:1000;
+      box-shadow: 0 2px 20px rgba(0,0,0,.25);
+    }
+    .navbar-brand-text { color:#fff; font-family:'Playfair Display',serif; font-size:1.4rem; font-weight:700; letter-spacing:.5px; }
+    .navbar-brand-sub  { color:var(--lime); font-size:.7rem; display:block; letter-spacing:2px; text-transform:uppercase; margin-top:-4px; }
+    .nav-link-custom   { color:rgba(255,255,255,.85)!important; font-weight:600; font-size:.9rem; transition:.2s; padding:6px 14px!important; border-radius:20px; }
+    .nav-link-custom:hover { color:#fff!important; background:rgba(255,255,255,.15); }
+    .btn-register { background:var(--coral); color:#fff!important; border-radius:25px!important; padding:8px 22px!important; font-weight:700!important; }
+    .btn-register:hover { background:#c96149!important; }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(27,73,101,.55) 0%, rgba(45,106,79,.6) 100%),
+                  url('https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=1600&q=80') center/cover no-repeat;
+      display: flex; align-items: center; padding-top: 80px;
+    }
+    .hero-badge   { background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.35); border-radius:25px; padding:6px 18px; font-size:.8rem; letter-spacing:1.5px; text-transform:uppercase; display:inline-block; margin-bottom:20px; }
+    .hero h1      { color:#fff; font-size:clamp(2.4rem,6vw,4.5rem); font-weight:900; line-height:1.1; text-shadow:0 2px 20px rgba(0,0,0,.3); }
+    .hero h1 span { color:var(--gold); }
+    .hero p       { color:rgba(255,255,255,.9); font-size:1.15rem; max-width:560px; margin:18px 0 32px; line-height:1.7; }
+
+    /* search card */
+    .search-card {
+      background:#fff; border-radius:18px; padding:28px 32px;
+      box-shadow:0 20px 60px rgba(0,0,0,.18);
+      margin-top:50px;
+    }
+    .search-card .form-label { font-weight:700; font-size:.82rem; color:var(--forest); text-transform:uppercase; letter-spacing:.8px; }
+    .search-card .form-control, .search-card .form-select {
+      border:2px solid #e8f5e9; border-radius:10px; padding:11px 14px; font-size:.95rem;
+      transition:.2s;
+    }
+    .search-card .form-control:focus, .search-card .form-select:focus { border-color:var(--leaf); box-shadow:0 0 0 3px rgba(82,183,136,.15); }
+    .btn-search { background:var(--forest); color:#fff; border-radius:12px; padding:12px 32px; font-weight:700; font-size:1rem; border:none; transition:.25s; }
+    .btn-search:hover { background:var(--ocean); transform:translateY(-1px); box-shadow:0 6px 20px rgba(45,106,79,.35); }
+
+    /* ── STATS BAR ── */
+    .stats-bar { background:var(--forest); color:#fff; padding:20px 0; }
+    .stat-item  { text-align:center; padding:8px 20px; border-right:1px solid rgba(255,255,255,.2); }
+    .stat-item:last-child { border-right:none; }
+    .stat-num   { font-family:'Playfair Display',serif; font-size:2rem; font-weight:700; color:var(--gold); }
+    .stat-lbl   { font-size:.78rem; text-transform:uppercase; letter-spacing:1px; opacity:.8; }
+
+    /* ── SECTION TITLES ── */
+    .section-tag  { color:var(--leaf); font-size:.8rem; font-weight:700; letter-spacing:2px; text-transform:uppercase; }
+    .section-title { font-size:clamp(1.8rem,3.5vw,2.6rem); color:var(--dark); margin-top:6px; }
+    .divider-leaf  { width:60px; height:4px; background:linear-gradient(90deg,var(--leaf),var(--forest)); border-radius:3px; margin:14px 0 0; }
+
+    /* ── CATEGORY PILLS ── */
+    .cat-pills    { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:32px; }
+    .cat-pill     { padding:8px 20px; border-radius:25px; font-size:.85rem; font-weight:600; cursor:pointer; transition:.2s; border:2px solid transparent; }
+    .cat-pill.active { background:var(--forest); color:#fff; }
+    .cat-pill:not(.active) { background:#f0f9f4; color:var(--forest); border-color:var(--lime); }
+    .cat-pill:hover { background:var(--forest); color:#fff; }
+
+    /* ── CARDS ── */
+    .spot-card {
+      border:none; border-radius:18px; overflow:hidden;
+      box-shadow:0 4px 20px rgba(0,0,0,.09);
+      transition:.3s; background:#fff; height:100%;
+    }
+    .spot-card:hover { transform:translateY(-6px); box-shadow:0 14px 40px rgba(0,0,0,.16); }
+    .card-img-wrap   { position:relative; height:220px; overflow:hidden; }
+    .card-img-wrap img { width:100%; height:100%; object-fit:cover; transition:.4s; }
+    .spot-card:hover .card-img-wrap img { transform:scale(1.06); }
+    .card-badge      { position:absolute; top:14px; left:14px; background:var(--forest); color:#fff; padding:4px 12px; border-radius:20px; font-size:.75rem; font-weight:700; }
+    .card-badge.resort  { background:var(--ocean); }
+    .card-badge.spot    { background:#6b4226; }
+    .card-badge.resto   { background:var(--coral); }
+    .card-badge.hotel   { background:#5e548e; }
+    .card-fav        { position:absolute; top:14px; right:14px; background:#fff; border-radius:50%; width:34px; height:34px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,.15); color:#ccc; transition:.2s; }
+    .card-fav:hover  { color:var(--coral); }
+    .card-body-custom { padding:18px 20px; }
+    .card-title-main  { font-size:1.05rem; font-weight:700; color:var(--dark); margin-bottom:4px; }
+    .card-location    { color:#888; font-size:.82rem; margin-bottom:10px; }
+    .card-rating      { color:var(--gold); font-size:.85rem; }
+    .card-price       { font-size:1.1rem; font-weight:700; color:var(--forest); }
+    .card-price span  { font-size:.78rem; font-weight:400; color:#999; }
+    .btn-book         { background:var(--leaf); color:#fff; border:none; border-radius:10px; padding:9px 20px; font-size:.85rem; font-weight:700; transition:.2s; width:100%; margin-top:12px; }
+    .btn-book:hover   { background:var(--forest); }
+
+    /* ── TOURIST SPOTS HIGHLIGHT ── */
+    .spots-section { background:linear-gradient(180deg,#f0fdf4 0%,#e8f5e9 100%); }
+    .spot-highlight { border-radius:20px; overflow:hidden; position:relative; cursor:pointer; }
+    .spot-highlight img { width:100%; height:280px; object-fit:cover; transition:.4s; }
+    .spot-highlight:hover img { transform:scale(1.05); }
+    .spot-overlay {
+      position:absolute; bottom:0; left:0; right:0;
+      background:linear-gradient(0deg,rgba(0,0,0,.75) 0%,transparent 100%);
+      padding:24px 20px 20px;
+    }
+    .spot-name  { color:#fff; font-size:1.15rem; font-weight:700; }
+    .spot-sub   { color:rgba(255,255,255,.8); font-size:.82rem; }
+    .spot-pill  { background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4); color:#fff; padding:3px 10px; border-radius:12px; font-size:.72rem; display:inline-block; margin-top:6px; }
+
+    /* ── HOW IT WORKS ── */
+    .how-section { background:#fff; }
+    .step-circle  { width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg,var(--leaf),var(--forest)); display:flex; align-items:center; justify-content:center; margin:0 auto 18px; color:#fff; font-size:1.6rem; box-shadow:0 8px 24px rgba(82,183,136,.35); }
+    .step-num     { position:absolute; top:-8px; right:-8px; background:var(--coral); color:#fff; width:26px; height:26px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:.75rem; font-weight:700; }
+    .step-card    { text-align:center; padding:28px 20px; border-radius:18px; background:#fafffe; border:2px solid #e8f5e9; transition:.25s; position:relative; }
+    .step-card:hover { border-color:var(--leaf); box-shadow:0 8px 28px rgba(82,183,136,.15); }
+    .connector    { position:absolute; top:35px; right:-30px; width:60px; height:2px; background:linear-gradient(90deg,var(--leaf),var(--lime)); }
+
+    /* ── TESTIMONIALS ── */
+    .testimonial-section { background:linear-gradient(135deg,var(--ocean) 0%,var(--forest) 100%); color:#fff; }
+    .testi-card { background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.2); border-radius:18px; padding:28px; transition:.25s; }
+    .testi-card:hover { background:rgba(255,255,255,.18); }
+    .testi-avatar { width:52px; height:52px; border-radius:50%; object-fit:cover; border:3px solid var(--lime); }
+    .testi-quote  { color:var(--lime); font-size:2.5rem; line-height:.5; opacity:.5; }
+
+    /* ── NEWSLETTER ── */
+    .newsletter { background:var(--mist); border-radius:24px; padding:50px 40px; text-align:center; }
+    .newsletter h3 { color:var(--forest); }
+    .newsletter-input { border:2px solid var(--lime); border-radius:30px 0 0 30px; padding:13px 22px; font-size:.95rem; border-right:none; }
+    .newsletter-input:focus { outline:none; border-color:var(--forest); }
+    .newsletter-btn { background:var(--forest); color:#fff; border:none; border-radius:0 30px 30px 0; padding:13px 28px; font-weight:700; transition:.2s; }
+    .newsletter-btn:hover { background:var(--ocean); }
+
+    /* ── FOOTER ── */
+    footer { background:var(--dark); color:rgba(255,255,255,.75); padding:60px 0 24px; }
+    .footer-logo   { font-family:'Playfair Display',serif; color:#fff; font-size:1.5rem; }
+    .footer-logo span { color:var(--lime); }
+    .footer-link   { color:rgba(255,255,255,.65); text-decoration:none; font-size:.9rem; display:block; margin-bottom:8px; transition:.2s; }
+    .footer-link:hover { color:var(--lime); padding-left:4px; }
+    .footer-divider { border-color:rgba(255,255,255,.1); margin:36px 0 20px; }
+    .social-icon   { width:38px; height:38px; border-radius:50%; background:rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,.75); transition:.2s; text-decoration:none; }
+    .social-icon:hover { background:var(--leaf); color:#fff; }
+
+    /* ── FLOATING CTA ── */
+    .floating-cta { position:fixed; bottom:28px; right:28px; z-index:999; }
+    .fcta-btn { width:58px; height:58px; border-radius:50%; background:var(--forest); color:#fff; border:none; font-size:1.3rem; box-shadow:0 6px 20px rgba(45,106,79,.45); transition:.25s; display:flex; align-items:center; justify-content:center; }
+    .fcta-btn:hover { background:var(--ocean); transform:scale(1.1); }
+
+    /* ── MODAL ── */
+    .modal-header-custom { background:linear-gradient(135deg,var(--forest),var(--ocean)); color:#fff; border-radius:12px 12px 0 0; }
+    .modal-header-custom .btn-close { filter:invert(1); }
+    .form-floating label { color:#888; }
+    .btn-modal-submit { background:var(--forest); color:#fff; border:none; border-radius:10px; padding:12px 32px; font-weight:700; width:100%; font-size:1rem; transition:.25s; }
+    .btn-modal-submit:hover { background:var(--ocean); }
+
+    /* Responsive tweaks */
+    @media(max-width:768px) {
+      .hero h1 { font-size:2.2rem; }
+      .search-card { padding:20px; }
+      .connector { display:none; }
+      .stat-item { border-right:none; border-bottom:1px solid rgba(255,255,255,.2); }
+    }
+
+    /* Leaf decoration */
+    .leaf-decor { position:absolute; opacity:.06; pointer-events:none; }
+    .section-wrapper { position:relative; overflow:hidden; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════ NAVBAR ══════════════════ -->
+<nav class="navbar navbar-custom navbar-expand-lg">
+  <div class="container">
+    <a class="navbar-brand d-flex align-items-center gap-2" href="#">
+      <div style="width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.18);display:flex;align-items:center;justify-content:center;">
+        <i class="fas fa-leaf" style="color:var(--lime);font-size:1.2rem;"></i>
+      </div>
+      <div>
+        <span class="navbar-brand-text">Palawan Tourism</span>
+        <span class="navbar-brand-sub">Provincial Tourism Department</span>
+      </div>
+    </a>
+    <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <i class="fas fa-bars" style="color:#fff;"></i>
+    </button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav ms-auto align-items-center gap-1">
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="#destinations"><i class="fas fa-map-marker-alt me-1"></i>Destinations</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="#establishments"><i class="fas fa-hotel me-1"></i>Establishments</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="#events"><i class="fas fa-calendar me-1"></i>Events</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom" href="#"><i class="fas fa-info-circle me-1"></i>About</a></li>
+        <li class="nav-item ms-2"><a class="nav-link nav-link-custom" href="#" data-bs-toggle="modal" data-bs-target="#loginModal"><i class="fas fa-sign-in-alt me-1"></i>Login</a></li>
+        <li class="nav-item"><a class="nav-link nav-link-custom btn-register" href="#" data-bs-toggle="modal" data-bs-target="#registerModal"><i class="fas fa-user-plus me-1"></i>Register</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════ HERO ══════════════════ -->
+<section class="hero">
+  <div class="container">
+    <div class="row align-items-center">
+      <div class="col-lg-6">
+        <span class="hero-badge"><i class="fas fa-award me-2"></i>Official Tourism Portal of Palawan</span>
+        <h1>Discover <span>Paradise</span><br/>in Palawan</h1>
+        <p>Your one-stop gateway to book hotels, resorts, restaurants, and iconic tourist destinations across the last ecological frontier of the Philippines.</p>
+        <div class="d-flex gap-3 flex-wrap">
+          <button class="btn btn-search btn-lg px-4" onclick="document.getElementById('searchSection').scrollIntoView({behavior:'smooth'})">
+            <i class="fas fa-compass me-2"></i>Explore Now
+          </button>
+          <button class="btn btn-outline-light btn-lg px-4" data-bs-toggle="modal" data-bs-target="#loginModal" style="border-radius:12px;">
+            <i class="fas fa-calendar-plus me-2"></i>Book a Stay
+          </button>
+        </div>
+      </div>
+      <div class="col-lg-6 mt-4 mt-lg-0">
+        <!-- Search Card -->
+        <div class="search-card" id="searchSection">
+          <h5 style="color:var(--forest);margin-bottom:20px;"><i class="fas fa-search me-2"></i>Find Your Perfect Escape</h5>
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label">Destination / Establishment</label>
+              <input type="text" class="form-control" placeholder="e.g. El Nido, Coron, Puerto Princesa..."/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Check-in Date</label>
+              <input type="date" class="form-control"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Check-out Date</label>
+              <input type="date" class="form-control"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Category</label>
+              <select class="form-select">
+                <option>All Categories</option>
+                <option>Hotels</option>
+                <option>Resorts</option>
+                <option>Tourist Spots</option>
+                <option>Restaurants</option>
+                <option>Event Venues</option>
+              </select>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label">Guests</label>
+              <select class="form-select">
+                <option>1 Guest</option>
+                <option>2 Guests</option>
+                <option>3–4 Guests</option>
+                <option>5+ Guests</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <button class="btn btn-search w-100"><i class="fas fa-search me-2"></i>Search Available Options</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ STATS BAR ══════════════════ -->
+<div class="stats-bar">
+  <div class="container">
+    <div class="row">
+      <div class="col-6 col-md-3 stat-item">
+        <div class="stat-num">128+</div>
+        <div class="stat-lbl">Registered Establishments</div>
+      </div>
+      <div class="col-6 col-md-3 stat-item">
+        <div class="stat-num">47</div>
+        <div class="stat-lbl">Tourist Spots</div>
+      </div>
+      <div class="col-6 col-md-3 stat-item">
+        <div class="stat-num">12K+</div>
+        <div class="stat-lbl">Happy Tourists</div>
+      </div>
+      <div class="col-6 col-md-3 stat-item">
+        <div class="stat-num">4.9★</div>
+        <div class="stat-lbl">Average Rating</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ FEATURED ESTABLISHMENTS ══════════════════ -->
+<section class="py-5 section-wrapper" id="establishments">
+  <div class="container py-3">
+    <div class="row mb-4 align-items-end">
+      <div class="col-md-7">
+        <div class="section-tag"><i class="fas fa-star me-2"></i>Featured Establishments</div>
+        <h2 class="section-title">Top Places to Stay & Dine</h2>
+        <div class="divider-leaf"></div>
+      </div>
+      <div class="col-md-5 text-md-end mt-3 mt-md-0">
+        <a href="#" class="btn" style="color:var(--forest);font-weight:700;border:2px solid var(--forest);border-radius:25px;padding:8px 22px;">View All <i class="fas fa-arrow-right ms-2"></i></a>
+      </div>
+    </div>
+
+    <!-- Category Pills -->
+    <div class="cat-pills" id="catPills">
+      <div class="cat-pill active" onclick="filterCat(this,'all')">All</div>
+      <div class="cat-pill" onclick="filterCat(this,'hotel')">🏨 Hotels</div>
+      <div class="cat-pill" onclick="filterCat(this,'resort')">🌴 Resorts</div>
+      <div class="cat-pill" onclick="filterCat(this,'restaurant')">🍽️ Restaurants</div>
+      <div class="cat-pill" onclick="filterCat(this,'venue')">🎪 Event Venues</div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Card 1 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="resort">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1540541338537-1220059169af?w=400&q=80" alt="El Nido Cove Resort"/>
+            <span class="card-badge resort">Resort</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">El Nido Cove Resort</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>El Nido, Palawan</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★★ <span style="color:#666;">(248)</span></div>
+              <div class="card-price">₱4,500 <span>/night</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Nestled between limestone cliffs with private beach access and infinity pool.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Book Now</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 2 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="hotel">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1506929562872-bb421503ef21?w=400&q=80" alt="Coron Bay Hotel"/>
+            <span class="card-badge hotel">Hotel</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Coron Bay Hotel & Spa</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>Coron, Palawan</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★☆ <span style="color:#666;">(185)</span></div>
+              <div class="card-price">₱3,800 <span>/night</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Panoramic bay views, world-class spa, and exceptional dive packages.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Book Now</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 3 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="restaurant">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=400&q=80" alt="Baywalk Grill"/>
+            <span class="card-badge resto">Restaurant</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Baywalk Grill & Seafood</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>Puerto Princesa</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★★ <span style="color:#666;">(312)</span></div>
+              <div class="card-price">₱600 <span>/person</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Fresh catch-of-the-day seafood with an open-air view of Honda Bay.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Reserve Table</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 4 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="resort">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&q=80" alt="Nacpan Eco Resort"/>
+            <span class="card-badge resort">Resort</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Nacpan Beach Eco Resort</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>El Nido, Palawan</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★★ <span style="color:#666;">(97)</span></div>
+              <div class="card-price">₱2,900 <span>/night</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Eco-friendly bamboo cottages on a pristine 4km twin-beach stretch.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Book Now</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 5 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="hotel">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=400&q=80" alt="Puerto Princesa Garden Inn"/>
+            <span class="card-badge hotel">Hotel</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Puerto Princesa Garden Inn</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>Puerto Princesa</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★☆ <span style="color:#666;">(203)</span></div>
+              <div class="card-price">₱2,200 <span>/night</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Lush tropical garden setting in the heart of the city, near Underground River tours.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Book Now</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 6 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="venue">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=400&q=80" alt="Palawan Event Center"/>
+            <span class="card-badge" style="background:#8b5e3c;">Venue</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Palawan Garden Event Center</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>Puerto Princesa</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★★ <span style="color:#666;">(58)</span></div>
+              <div class="card-price">₱25,000 <span>/event</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Outdoor and indoor event spaces for weddings, conferences, and cultural events.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Book Venue</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 7 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="resort">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1567638542424-2cb3e4c8bb49?w=400&q=80" alt="Port Barton Sunset Resort"/>
+            <span class="card-badge resort">Resort</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Port Barton Sunset Resort</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>San Vicente, Palawan</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★☆ <span style="color:#666;">(122)</span></div>
+              <div class="card-price">₱3,200 <span>/night</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Overwater bungalows with direct access to coral-rich snorkeling sites.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Book Now</button>
+          </div>
+        </div>
+      </div>
+      <!-- Card 8 -->
+      <div class="col-sm-6 col-lg-3 card-item" data-cat="restaurant">
+        <div class="spot-card">
+          <div class="card-img-wrap">
+            <img src="https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=80" alt="Kalui Restaurant"/>
+            <span class="card-badge resto">Restaurant</span>
+            <div class="card-fav"><i class="fas fa-heart"></i></div>
+          </div>
+          <div class="card-body-custom">
+            <div class="card-title-main">Kalui's Floating Kitchen</div>
+            <div class="card-location"><i class="fas fa-map-marker-alt me-1"></i>Puerto Princesa</div>
+            <div class="d-flex justify-content-between align-items-center">
+              <div class="card-rating">★★★★★ <span style="color:#666;">(274)</span></div>
+              <div class="card-price">₱850 <span>/person</span></div>
+            </div>
+            <p style="font-size:.82rem;color:#666;margin-top:8px;">Award-winning Filipino cuisine served on a scenic floating restaurant.</p>
+            <button class="btn btn-book" data-bs-toggle="modal" data-bs-target="#bookModal"><i class="fas fa-calendar-check me-2"></i>Reserve Table</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ TOURIST SPOTS ══════════════════ -->
+<section class="py-5 spots-section section-wrapper" id="destinations">
+  <div class="container py-3">
+    <div class="row mb-4">
+      <div class="col-12 text-center">
+        <div class="section-tag"><i class="fas fa-mountain me-2"></i>Must-Visit Destinations</div>
+        <h2 class="section-title">Iconic Palawan Tourist Spots</h2>
+        <div class="divider-leaf mx-auto"></div>
+        <p class="mt-3" style="color:#666;max-width:580px;margin-left:auto;margin-right:auto;">From UNESCO World Heritage Sites to hidden lagoons — Palawan's natural wonders await.</p>
+      </div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-6 col-lg-4">
+        <div class="spot-highlight" onclick="openSpot('underground-river')">
+          <img src="https://images.unsplash.com/photo-1606820854416-439b3305ff39?w=600&q=80" alt="Underground River"/>
+          <div class="spot-overlay">
+            <div class="spot-name">Puerto Princesa Subterranean River</div>
+            <div class="spot-sub">UNESCO World Heritage Site • New 7 Wonders of Nature</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book Tour</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="spot-highlight" onclick="openSpot('el-nido')">
+          <img src="https://images.unsplash.com/photo-1518548419970-58e3b4079ab2?w=600&q=80" alt="El Nido"/>
+          <div class="spot-overlay">
+            <div class="spot-name">El Nido Islands & Lagoons</div>
+            <div class="spot-sub">Island Hopping • Big & Small Lagoons • Secret Beach</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book Island Tour</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-4">
+        <div class="spot-highlight" onclick="openSpot('coron')">
+          <img src="https://images.unsplash.com/photo-1551918120-9739cb430c6d?w=600&q=80" alt="Coron"/>
+          <div class="spot-overlay">
+            <div class="spot-name">Coron Island Lagoons</div>
+            <div class="spot-sub">Kayangan Lake • Twin Lagoon • WWII Wreck Diving</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book Dive Tour</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="spot-highlight">
+          <img src="https://images.unsplash.com/photo-1437719417032-8595fd9e9dc6?w=400&q=80" alt="Honda Bay"/>
+          <div class="spot-overlay">
+            <div class="spot-name">Honda Bay Island Hopping</div>
+            <div class="spot-sub">Snake Island • Luli Island • Starfish Island</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="spot-highlight">
+          <img src="https://images.unsplash.com/photo-1471922694854-ff1b63b20054?w=400&q=80" alt="Nacpan Beach"/>
+          <div class="spot-overlay">
+            <div class="spot-name">Nacpan Twin Beach</div>
+            <div class="spot-sub">4km Pristine White Sand • Dual-facing Beaches</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="spot-highlight">
+          <img src="https://images.unsplash.com/photo-1483683804023-6ccdb62f86ef?w=400&q=80" alt="Tubbataha Reef"/>
+          <div class="spot-overlay">
+            <div class="spot-name">Tubbataha Reef National Park</div>
+            <div class="spot-sub">UNESCO Marine Reserve • World-Class Diving</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book Liveaboard</span>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6 col-lg-3">
+        <div class="spot-highlight">
+          <img src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?w=400&q=80" alt="Sabang Beach"/>
+          <div class="spot-overlay">
+            <div class="spot-name">Sabang Treehouse Trails</div>
+            <div class="spot-sub">Mangrove Walk • Firefly Tours • Wildlife Spotting</div>
+            <span class="spot-pill"><i class="fas fa-ticket-alt me-1"></i>Book</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ HOW IT WORKS ══════════════════ -->
+<section class="py-5 how-section" id="events">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <div class="section-tag"><i class="fas fa-map me-2"></i>Simple Process</div>
+      <h2 class="section-title">How to Book in 4 Easy Steps</h2>
+      <div class="divider-leaf mx-auto"></div>
+    </div>
+    <div class="row g-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-circle" style="position:relative;">
+            <i class="fas fa-user-plus"></i>
+            <span class="step-num">1</span>
+          </div>
+          <h5 style="color:var(--dark);">Register as Tourist</h5>
+          <p style="color:#666;font-size:.9rem;">Create your free account on the Palawan Tourism Portal in under 2 minutes.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-circle" style="position:relative;">
+            <i class="fas fa-search-location"></i>
+            <span class="step-num">2</span>
+          </div>
+          <h5 style="color:var(--dark);">Browse & Discover</h5>
+          <p style="color:#666;font-size:.9rem;">Explore hotels, resorts, tourist spots, and events. Filter by date, location, and budget.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-circle" style="position:relative;">
+            <i class="fas fa-calendar-check"></i>
+            <span class="step-num">3</span>
+          </div>
+          <h5 style="color:var(--dark);">Book & Schedule</h5>
+          <p style="color:#666;font-size:.9rem;">Select your preferred services, rooms, or event slots and confirm your booking instantly.</p>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="step-card">
+          <div class="step-circle" style="position:relative;">
+            <i class="fas fa-umbrella-beach"></i>
+            <span class="step-num">4</span>
+          </div>
+          <h5 style="color:var(--dark);">Enjoy Paradise!</h5>
+          <p style="color:#666;font-size:.9rem;">Receive your e-confirmation, present it on arrival, and enjoy a seamless Palawan experience.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ TESTIMONIALS ══════════════════ -->
+<section class="py-5 testimonial-section">
+  <div class="container py-3">
+    <div class="text-center mb-5">
+      <div class="section-tag" style="color:var(--lime);"><i class="fas fa-comments me-2"></i>Traveler Stories</div>
+      <h2 class="section-title" style="color:#fff;">What Tourists Say</h2>
+      <div class="divider-leaf mx-auto" style="background:linear-gradient(90deg,var(--lime),var(--gold));"></div>
+    </div>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="testi-card">
+          <div class="testi-quote">"</div>
+          <p style="color:rgba(255,255,255,.88);font-size:.95rem;line-height:1.7;">Booking El Nido Cove Resort through this portal was incredibly easy. The entire process from registration to check-in was seamless. Highly recommend!</p>
+          <div class="d-flex align-items-center gap-3 mt-16" style="margin-top:18px;">
+            <img src="https://i.pravatar.cc/100?img=5" alt="Tourist" class="testi-avatar"/>
+            <div>
+              <div style="color:#fff;font-weight:700;">Maria Santos</div>
+              <div style="color:var(--lime);font-size:.8rem;">Manila, Philippines</div>
+              <div style="color:var(--gold);font-size:.85rem;">★★★★★</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testi-card">
+          <div class="testi-quote">"</div>
+          <p style="color:rgba(255,255,255,.88);font-size:.95rem;line-height:1.7;">The one-stop booking system made our family trip to Coron so convenient. We booked our hotel, island tour, and restaurant all in one place. Amazing!</p>
+          <div class="d-flex align-items-center gap-3 mt-16" style="margin-top:18px;">
+            <img src="https://i.pravatar.cc/100?img=15" alt="Tourist" class="testi-avatar"/>
+            <div>
+              <div style="color:#fff;font-weight:700;">James Reyes</div>
+              <div style="color:var(--lime);font-size:.8rem;">Cebu, Philippines</div>
+              <div style="color:var(--gold);font-size:.85rem;">★★★★★</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="testi-card">
+          <div class="testi-quote">"</div>
+          <p style="color:rgba(255,255,255,.88);font-size:.95rem;line-height:1.7;">As a foreign tourist, this portal was a lifesaver. Everything in English, real-time availability, and the underground river tour ticket was delivered to my email instantly!</p>
+          <div class="d-flex align-items-center gap-3 mt-16" style="margin-top:18px;">
+            <img src="https://i.pravatar.cc/100?img=25" alt="Tourist" class="testi-avatar"/>
+            <div>
+              <div style="color:#fff;font-weight:700;">Sophie Laurent</div>
+              <div style="color:var(--lime);font-size:.8rem;">Lyon, France</div>
+              <div style="color:var(--gold);font-size:.85rem;">★★★★★</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ NEWSLETTER ══════════════════ -->
+<section class="py-5 bg-white">
+  <div class="container py-2">
+    <div class="newsletter">
+      <div class="section-tag" style="display:block;margin-bottom:10px;"><i class="fas fa-envelope me-2"></i>Stay Updated</div>
+      <h3 class="mb-2">Get Palawan Travel Updates</h3>
+      <p style="color:#666;margin-bottom:26px;">Subscribe for exclusive deals, new establishment listings, and seasonal event announcements.</p>
+      <div class="d-flex justify-content-center">
+        <input type="email" class="newsletter-input" placeholder="Enter your email address..." style="width:300px;"/>
+        <button class="newsletter-btn">Subscribe <i class="fas fa-paper-plane ms-2"></i></button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════ FOOTER ══════════════════ -->
+<footer>
+  <div class="container">
+    <div class="row g-4">
+      <div class="col-lg-4">
+        <div class="footer-logo">🌿 Palawan <span>Tourism</span></div>
+        <p style="font-size:.88rem;margin-top:14px;line-height:1.7;">The official tourism management portal of the Provincial Government of Palawan, Philippines. Promoting sustainable and responsible tourism.</p>
+        <div class="d-flex gap-2 mt-20" style="margin-top:20px;">
+          <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="social-icon"><i class="fab fa-youtube"></i></a>
+        </div>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 style="color:#fff;margin-bottom:16px;font-family:'Nunito',sans-serif;font-weight:700;">Quick Links</h6>
+        <a class="footer-link" href="#">Home</a>
+        <a class="footer-link" href="#">Destinations</a>
+        <a class="footer-link" href="#">Establishments</a>
+        <a class="footer-link" href="#">Events</a>
+        <a class="footer-link" href="#">Contact Us</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 style="color:#fff;margin-bottom:16px;font-family:'Nunito',sans-serif;font-weight:700;">For Tourists</h6>
+        <a class="footer-link" href="#">Register</a>
+        <a class="footer-link" href="#">My Bookings</a>
+        <a class="footer-link" href="#">Travel Guide</a>
+        <a class="footer-link" href="#">FAQ</a>
+        <a class="footer-link" href="#">Support</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 style="color:#fff;margin-bottom:16px;font-family:'Nunito',sans-serif;font-weight:700;">For Business</h6>
+        <a class="footer-link" href="#">Register Establishment</a>
+        <a class="footer-link" href="#">Partner Login</a>
+        <a class="footer-link" href="#">Guidelines</a>
+        <a class="footer-link" href="#">Accreditation</a>
+      </div>
+      <div class="col-6 col-lg-2">
+        <h6 style="color:#fff;margin-bottom:16px;font-family:'Nunito',sans-serif;font-weight:700;">Government</h6>
+        <a class="footer-link" href="#">Admin Login</a>
+        <a class="footer-link" href="#">DOT Palawan</a>
+        <a class="footer-link" href="#">Privacy Policy</a>
+        <a class="footer-link" href="#">Terms of Use</a>
+      </div>
+    </div>
+    <hr class="footer-divider"/>
+    <div class="d-flex flex-wrap justify-content-between align-items-center" style="font-size:.83rem;">
+      <span>© 2025 Provincial Tourism Department of Palawan. All rights reserved.</span>
+      <span style="color:var(--lime);">Powered by PalawanTourism.gov.ph</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Floating Chat -->
+<div class="floating-cta">
+  <button class="fcta-btn" title="Need Help?" data-bs-toggle="tooltip" data-bs-placement="left" data-bs-title="Need Help?">
+    <i class="fas fa-comments"></i>
+  </button>
+</div>
+
+<!-- ══════════════════ LOGIN MODAL ══════════════════ -->
+<div class="modal fade" id="loginModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden;">
+      <div class="modal-header modal-header-custom py-4">
+        <div>
+          <h5 class="modal-title mb-0"><i class="fas fa-leaf me-2"></i>Welcome Back to Palawan</h5>
+          <small style="opacity:.8;">Sign in to your account</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Role selector -->
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-sm flex-fill active" onclick="setRole(this,'tourist')" id="roleBtn1" style="background:var(--forest);color:#fff;border-radius:8px;font-weight:600;">🌴 Tourist</button>
+          <button class="btn btn-sm flex-fill" onclick="setRole(this,'establishment')" id="roleBtn2" style="background:#f0f9f4;color:var(--forest);border-radius:8px;font-weight:600;border:2px solid var(--lime);">🏨 Establishment</button>
+          <button class="btn btn-sm flex-fill" onclick="setRole(this,'admin')" id="roleBtn3" style="background:#f0f9f4;color:var(--forest);border-radius:8px;font-weight:600;border:2px solid var(--lime);">🏛️ Gov Admin</button>
+        </div>
+        <form>
+          <div class="mb-3">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Email Address</label>
+            <input type="email" class="form-control" placeholder="your@email.com" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+          </div>
+          <div class="mb-3">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Password</label>
+            <input type="password" class="form-control" placeholder="••••••••" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mb-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="rememberMe"/>
+              <label class="form-check-label" for="rememberMe" style="font-size:.85rem;">Remember me</label>
+            </div>
+            <a href="#" style="color:var(--leaf);font-size:.85rem;">Forgot password?</a>
+          </div>
+          <button type="submit" class="btn btn-modal-submit"><i class="fas fa-sign-in-alt me-2"></i>Sign In</button>
+        </form>
+        <hr style="margin:20px 0;"/>
+        <p class="text-center" style="font-size:.88rem;color:#666;">Don't have an account? <a href="#" style="color:var(--forest);font-weight:700;" data-bs-dismiss="modal" data-bs-toggle="modal" data-bs-target="#registerModal">Register here</a></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ REGISTER MODAL ══════════════════ -->
+<div class="modal fade" id="registerModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden;">
+      <div class="modal-header modal-header-custom py-4">
+        <div>
+          <h5 class="modal-title mb-0"><i class="fas fa-user-plus me-2"></i>Join Palawan Tourism Portal</h5>
+          <small style="opacity:.8;">Create your free account</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="d-flex gap-2 mb-4">
+          <button class="btn btn-sm flex-fill active" onclick="setRegRole(this,'tourist')" style="background:var(--forest);color:#fff;border-radius:8px;font-weight:600;">🌴 I'm a Tourist</button>
+          <button class="btn btn-sm flex-fill" onclick="setRegRole(this,'establishment')" style="background:#f0f9f4;color:var(--forest);border-radius:8px;font-weight:600;border:2px solid var(--lime);">🏨 Register Establishment</button>
+        </div>
+        <form>
+          <div class="row g-3">
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">First Name</label>
+              <input type="text" class="form-control" placeholder="Juan" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Last Name</label>
+              <input type="text" class="form-control" placeholder="dela Cruz" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Email Address</label>
+              <input type="email" class="form-control" placeholder="juan@email.com" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Phone Number</label>
+              <input type="tel" class="form-control" placeholder="+63 9XX XXX XXXX" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Password</label>
+              <input type="password" class="form-control" placeholder="••••••••" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+            </div>
+            <div class="col-sm-6">
+              <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Confirm Password</label>
+              <input type="password" class="form-control" placeholder="••••••••" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="agreeTerms"/>
+                <label class="form-check-label" for="agreeTerms" style="font-size:.85rem;">I agree to the <a href="#" style="color:var(--leaf);">Terms of Use</a> and <a href="#" style="color:var(--leaf);">Privacy Policy</a></label>
+              </div>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-modal-submit"><i class="fas fa-user-check me-2"></i>Create Account</button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ BOOKING MODAL ══════════════════ -->
+<div class="modal fade" id="bookModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content" style="border-radius:16px;border:none;overflow:hidden;">
+      <div class="modal-header modal-header-custom py-4">
+        <div>
+          <h5 class="modal-title mb-0"><i class="fas fa-calendar-check me-2"></i>Book Your Stay</h5>
+          <small style="opacity:.8;">Complete your reservation</small>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <!-- Progress Steps -->
+        <div class="d-flex align-items-center mb-4 gap-2" style="font-size:.82rem;font-weight:700;">
+          <div style="background:var(--forest);color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">1</div>
+          <span style="color:var(--forest);">Select Dates</span>
+          <div style="flex:1;height:2px;background:var(--lime);"></div>
+          <div style="background:var(--lime);color:var(--forest);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">2</div>
+          <span style="color:#999;">Choose Room/Service</span>
+          <div style="flex:1;height:2px;background:#e0e0e0;"></div>
+          <div style="background:#e0e0e0;color:#999;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;">3</div>
+          <span style="color:#999;">Confirm & Pay</span>
+        </div>
+        <div class="row g-3">
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Check-in Date</label>
+            <input type="date" class="form-control" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Check-out Date</label>
+            <input type="date" class="form-control" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;"/>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Room Type</label>
+            <select class="form-select" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;">
+              <option>Deluxe Ocean View – ₱4,500/night</option>
+              <option>Superior Garden Room – ₱3,200/night</option>
+              <option>Family Suite – ₱7,800/night</option>
+              <option>Beachfront Villa – ₱12,500/night</option>
+            </select>
+          </div>
+          <div class="col-sm-6">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Number of Guests</label>
+            <select class="form-select" style="border-radius:10px;border:2px solid #e8f5e9;padding:11px 14px;">
+              <option>1 Guest</option>
+              <option>2 Guests</option>
+              <option>3 Guests</option>
+              <option>4+ Guests</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold" style="font-size:.85rem;color:var(--forest);">Add-on Services</label>
+            <div class="row g-2">
+              <div class="col-6 col-sm-3"><div class="form-check p-3" style="border:2px solid #e8f5e9;border-radius:10px;"><input type="checkbox" class="form-check-input"/><label class="form-check-label" style="font-size:.82rem;">Island Tour</label></div></div>
+              <div class="col-6 col-sm-3"><div class="form-check p-3" style="border:2px solid #e8f5e9;border-radius:10px;"><input type="checkbox" class="form-check-input"/><label class="form-check-label" style="font-size:.82rem;">Airport Transfer</label></div></div>
+              <div class="col-6 col-sm-3"><div class="form-check p-3" style="border:2px solid #e8f5e9;border-radius:10px;"><input type="checkbox" class="form-check-input"/><label class="form-check-label" style="font-size:.82rem;">Breakfast</label></div></div>
+              <div class="col-6 col-sm-3"><div class="form-check p-3" style="border:2px solid #e8f5e9;border-radius:10px;"><input type="checkbox" class="form-check-input"/><label class="form-check-label" style="font-size:.82rem;">Dive Package</label></div></div>
+            </div>
+          </div>
+          <div class="col-12">
+            <div style="background:var(--mist);border-radius:12px;padding:16px 20px;">
+              <div class="d-flex justify-content-between"><span>Room (3 nights × ₱4,500)</span><strong>₱13,500</strong></div>
+              <div class="d-flex justify-content-between mt-1"><span>Tourism Fee</span><strong>₱250</strong></div>
+              <hr style="margin:10px 0;border-color:var(--lime);"/>
+              <div class="d-flex justify-content-between"><strong style="color:var(--forest);">Total</strong><strong style="color:var(--forest);font-size:1.15rem;">₱13,750</strong></div>
+            </div>
+          </div>
+          <div class="col-12">
+            <button type="button" class="btn btn-modal-submit"><i class="fas fa-lock me-2"></i>Proceed to Payment</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  // Category filter
+  function filterCat(el, cat) {
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    el.classList.add('active');
+    document.querySelectorAll('.card-item').forEach(card => {
+      card.style.display = (cat === 'all' || card.dataset.cat === cat) ? 'block' : 'none';
+    });
+  }
+  // Role selector login
+  function setRole(btn, role) {
+    ['roleBtn1','roleBtn2','roleBtn3'].forEach(id => {
+      const b = document.getElementById(id);
+      b.style.background = '#f0f9f4'; b.style.color = 'var(--forest)';
+      b.style.border = '2px solid var(--lime)';
+    });
+    btn.style.background = 'var(--forest)'; btn.style.color = '#fff'; btn.style.border = 'none';
+  }
+  function setRegRole(btn, role) {
+    btn.parentElement.querySelectorAll('.btn').forEach(b => {
+      b.style.background = '#f0f9f4'; b.style.color = 'var(--forest)';
+      b.style.border = '2px solid var(--lime)';
+    });
+    btn.style.background = 'var(--forest)'; btn.style.color = '#fff'; btn.style.border = 'none';
+  }
+  // Tooltips
+  const tooltipEls = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+  tooltipEls.forEach(el => new bootstrap.Tooltip(el));
+  // Navbar scroll effect
+  window.addEventListener('scroll', () => {
+    const nav = document.querySelector('.navbar-custom');
+    nav.style.padding = window.scrollY > 50 ? '8px 0' : '14px 0';
+  });
+  function openSpot(id) {
+    document.querySelector('[data-bs-target="#bookModal"]').click();
+  }
+</script>
+</body>
+</html>
